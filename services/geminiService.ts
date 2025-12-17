@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { ShapeData } from "../types";
+import { ShapeData } from "../types.ts";
 
 const getBalanceStatus = (tilt: number) => {
   if (Math.abs(tilt) < 0.5) return "Balanced";
@@ -22,7 +22,7 @@ export const analyzeComposition = async (shapes: ShapeData[], tiltAngle: number,
     const balanceStatus = getBalanceStatus(tiltAngle);
     
     // Categorize shapes for better description
-    const leftShapes = shapes.filter(s => s.x + s.width / 2 < 400); // Assuming 800 width roughly
+    const leftShapes = shapes.filter(s => s.x + s.width / 2 < 400); 
     const rightShapes = shapes.filter(s => s.x + s.width / 2 >= 400);
     
     const shapeDescription = shapes.map(s => {
@@ -53,13 +53,11 @@ export const analyzeComposition = async (shapes: ShapeData[], tiltAngle: number,
       6. Keep it under 150 words.
     `;
 
-    // Fixed: Always use recommended models for basic text tasks
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
-    // Fixed: Directly access .text property as it is a property, not a method.
     return response.text || "Could not generate analysis.";
   } catch (error) {
     console.error("Error calling Gemini:", error);

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ShapeData, Mode, ShapeType, Rect } from './types';
-import { Shape } from './components/Shape';
-import { BalanceBeam } from './components/BalanceBeam';
-import { analyzeComposition } from './services/geminiService';
-import { COLORS, SHADE_NAMES, SHADE_SATURATIONS, SHADE_WEIGHT_MULTIPLIERS, FLOOR_HEIGHT } from './constants';
+import { ShapeData, Mode, ShapeType, Rect } from './types.ts';
+import { Shape } from './components/Shape.tsx';
+import { BalanceBeam } from './components/BalanceBeam.tsx';
+import { analyzeComposition } from './services/geminiService.ts';
+import { COLORS, SHADE_NAMES, SHADE_SATURATIONS, SHADE_WEIGHT_MULTIPLIERS, FLOOR_HEIGHT } from './constants.ts';
 import { Trash2, RotateCw, RefreshCw, HelpCircle, Wand2, ArrowRight, LayoutGrid, Scale, Grid3x3, Columns } from 'lucide-react';
 
 const SNAP_SIZE = 20;
@@ -14,7 +15,6 @@ const App: React.FC = () => {
   const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('asymmetrical');
   const [isChallengeMode, setIsChallengeMode] = useState(false);
-  // Fixed: Added state to track the number of shapes in the current challenge to be used in JSX
   const [challengeCount, setChallengeCount] = useState(0);
   const [guideMode, setGuideMode] = useState<'none' | 'thirds' | 'columns'>('none');
   
@@ -208,27 +208,21 @@ const App: React.FC = () => {
     const fulcrumX = boardWidth / 2;
     const floorY = boardHeight - FLOOR_HEIGHT;
 
-    /**
-     * Requirement: NO repeats on size. Each shape must be unique in size.
-     * Tint (shade) also randomized but limited to pool of 5.
-     */
     const generateUniqueBlueprints = (count: number) => {
         const blueprints: {size: number, shade: number}[] = [];
-        // Larger pool of sizes to ensure uniqueness for up to 8 shapes
         const availableSizes = [60, 70, 80, 90, 100, 110, 120, 130, 140, 150];
         const shuffledSizes = [...availableSizes].sort(() => Math.random() - 0.5);
         
         for (let i = 0; i < count; i++) {
             blueprints.push({
                 size: shuffledSizes[i],
-                shade: (i % 5) + 1 // Cycles through 1-5 to keep tints varied
+                shade: (i % 5) + 1
             });
         }
         return blueprints.sort(() => Math.random() - 0.5);
     };
 
     const count = Math.random() > 0.5 ? 6 : 8;
-    // Fixed: Set the challengeCount state so it's accessible in the JSX
     setChallengeCount(count);
     const blueprints = generateUniqueBlueprints(count);
     let blueprintIdx = 0;
@@ -288,11 +282,8 @@ const App: React.FC = () => {
     else if (pattern === 'dynamic-pyramid') {
         const size = 80;
         const startX = 20;
-        // Base
         for (let i = 0; i < 3; i++) tryAddShape({ x: startX + (i * size), y: floorY - size });
-        // Layer 2
         for (let i = 0; i < 2; i++) tryAddShape({ x: startX + (size/2) + (i * size), y: floorY - (size*2) });
-        // Apex/Remainder
         while (blueprintIdx < blueprints.length) {
           tryAddShape({ x: startX + size, y: floorY - (size * (3 + (blueprintIdx-5))) });
         }
@@ -537,7 +528,6 @@ const App: React.FC = () => {
                )}
 
               {shapes.map(shape => <Shape key={shape.id} shape={shape} isSelected={selectedShapeId === shape.id} onMouseDown={handleMouseDown}/>)}
-              {/* Thicker vertical center line */}
               <div className="absolute top-0 bottom-[140px] left-1/2 -translate-x-1/2 border-l-4 border-dashed border-white/30 z-0 pointer-events-none"></div>
               <div className="absolute bottom-0 left-0 right-0 h-[140px] bg-slate-800 border-t-2 border-slate-700 z-[5]"></div>
               <BalanceBeam tiltAngle={tiltAngle} />

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ShapeData } from '../types';
+import { ShapeData } from '../types.ts';
 
 interface ShapeProps {
   shape: ShapeData;
@@ -8,7 +9,6 @@ interface ShapeProps {
 }
 
 export const Shape: React.FC<ShapeProps> = ({ shape, isSelected, onMouseDown }) => {
-  // White border for selection on dark background
   const borderStyle = shape.isChallengeShape ? '2px dashed rgba(255,255,255,0.4)' : isSelected ? '2px solid white' : 'none';
   const zIndex = isSelected ? 50 : 20;
 
