@@ -4,8 +4,8 @@ import { ShapeData } from "../types.ts";
 
 const getBalanceStatus = (tilt: number) => {
   if (Math.abs(tilt) < 0.5) return "Balanced";
-  if (tilt > 0) return "Tipped Right";
-  return "Tipped Left";
+  if (tilt > 0) return "Leaning Right";
+  return "Leaning Left";
 };
 
 export const analyzeComposition = async (shapes: ShapeData[], tiltAngle: number, mode: string): Promise<string> => {
@@ -21,36 +21,29 @@ export const analyzeComposition = async (shapes: ShapeData[], tiltAngle: number,
     const totalShapes = shapes.length;
     const balanceStatus = getBalanceStatus(tiltAngle);
     
-    // Categorize shapes for better description
-    const leftShapes = shapes.filter(s => s.x + s.width / 2 < 400); 
-    const rightShapes = shapes.filter(s => s.x + s.width / 2 >= 400);
-    
     const shapeDescription = shapes.map(s => {
-      const position = s.x + s.width / 2 < 400 ? "Left side" : "Right side";
-      return `- A ${s.type} on the ${position} (Size: ${s.height}x${s.width}, Shade Level: ${s.shade})`;
+      const position = s.x + s.width / 2 < 400 ? "Left" : "Right";
+      return `- ${s.type} on the ${position} (Size: ${s.height}, Shade: ${s.shade}/5)`;
     }).join("\n");
 
     const prompt = `
-      You are a helpful and objective art coach for 6th grade students.
+      You are a friendly middle-school art teacher helping 11-year-olds learn about visual balance.
       
-      Analyze the following graphic design composition created by a student in the "Visual Balance Coach" app.
+      The student is using an app where shapes have "weight" based on their size and how dark their color is.
       
-      Context:
-      - The goal is to create a visually balanced composition using shapes.
-      - The current mode is: ${mode}.
-      - The mechanical balance beam status is: ${balanceStatus} (Tilt Angle: ${tiltAngle.toFixed(1)} degrees).
-      - Total Shapes: ${totalShapes} (${leftShapes.length} on left, ${rightShapes.length} on right).
-      
-      Shape Details:
+      Current Work:
+      - The scale is: ${balanceStatus}.
+      - Working in: ${mode} mode.
+      - Shapes used:
       ${shapeDescription}
       
-      Instructions:
-      1. Confirm if the composition is balanced mechanically.
-      2. Discuss the visual weight distribution (size/color darkness).
-      3. Comment on the use of symmetry vs asymmetry.
-      4. Provide one clear strength and one specific, constructive tip for improvement.
-      5. Tone: Friendly and professional, but not overly excited. Avoid excessive exclamation marks. Use a coaching voice, not a cheerleader voice.
-      6. Keep it under 150 words.
+      Instructions for your feedback:
+      1. Start by telling them if their scale is balanced or which side feels "heavier" to the eye.
+      2. Explain simply how a big shape or a dark color adds "visual weight."
+      3. Give one easy suggestion to improve the balance (like moving a shape or changing its color).
+      4. Vocabulary: Use simple words. No complex art jargon.
+      5. Length: Keep it very short (3 to 5 sentences max).
+      6. Tone: Be a helpful mentor. Not a cheerleader, but encouraging.
     `;
 
     const response = await ai.models.generateContent({
@@ -58,9 +51,9 @@ export const analyzeComposition = async (shapes: ShapeData[], tiltAngle: number,
       contents: prompt,
     });
 
-    return response.text || "Could not generate analysis.";
+    return response.text || "I couldn't quite see your work. Try clicking Analyze again!";
   } catch (error) {
     console.error("Error calling Gemini:", error);
-    return "Sorry, I couldn't analyze your artwork right now. Please try again later.";
+    return "Oops! I'm having a little trouble thinking right now. Try again in a second.";
   }
 };
